@@ -4,7 +4,7 @@ from prophet import Prophet
 import plotly.graph_objects as go
 from pandas.tseries.frequencies import to_offset
 
-st.title("📈 Sales Forecast with P50 / P90")
+st.title("📈 Sales Forecast con P50 / P90")
 
 # Upload CSV file
 file = st.file_uploader("Upload a CSV file with 'ds' (date) and 'y' (sales)", type="csv")
