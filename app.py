@@ -70,27 +70,27 @@ if file:
     ))
 
     # 5. Vertical line at forecast start
-    fig.add_shape(
-        type="line",
-        x0=last_date,
-        x1=last_date,
-        y0=0,
-        y1=1,
-        xref='x',
-        yref='paper',
-        line=dict(color="gray", dash="dot")
-    )
+    # fig.add_shape(
+    #     type="line",
+    #     x0=last_date,
+    #     x1=last_date,
+    #     y0=0,
+    #     y1=1,
+    #     xref='x',
+    #     yref='paper',
+    #     line=dict(color="gray", dash="dot")
+    # )
 
     # 6. Annotation label
-    fig.add_annotation(
-        x=last_date,
-        y=1.02,
-        xref="x",
-        yref="paper",
-        showarrow=False,
-        text="Forecast Starts",
-        font=dict(color="gray")
-    )
+    # fig.add_annotation(
+    #     x=last_date,
+    #     y=1.02,
+    #     xref="x",
+    #     yref="paper",
+    #     showarrow=False,
+    #     text="Forecast Starts",
+    #     font=dict(color="gray")
+    # )
 
     fig.update_layout(
         title="Actual Sales + Forecast with P10–P90 Uncertainty",
