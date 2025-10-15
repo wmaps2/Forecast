@@ -29,7 +29,13 @@ elif file:
     df = pd.read_csv(file)
 
 if df is not None:
-    df.columns = ['ds', 'y']
+    # Ensure 'ds' and 'y' columns exist anywhere in the file
+    if {'ds', 'y'}.issubset(df.columns):
+        df = df[['ds', 'y']]
+    else:
+        st.error("CSV/Sheet must contain columns named 'ds' (date) and 'y' (sales).")
+        st.stop()
+
     df['ds'] = pd.to_datetime(df['ds'])
     st.subheader("📊 Sales Data Preview")
     st.write(df.tail())
