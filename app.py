@@ -3,6 +3,9 @@ import pandas as pd
 from prophet import Prophet
 import plotly.graph_objects as go
 from pandas.tseries.frequencies import to_offset
+from sklearn.linear_model import LinearRegression
+import numpy as np
+from statsmodels.tsa.arima.model import ARIMA
 
 def find_header_row(df):
     for i in range(min(10, len(df))):
@@ -137,8 +140,6 @@ elif st.session_state.page == "forecast":
         plot_p90_y = forecast_future['yhat_upper']
         plot_p10_y = forecast_future['yhat_lower']
     elif model_type == "Linear Regression":
-        from sklearn.linear_model import LinearRegression
-        import numpy as np
         df_sorted = df.sort_values('ds')
         X = df_sorted['ds'].map(pd.Timestamp.toordinal).values.reshape(-1, 1)
         y = df_sorted['y'].values
@@ -160,7 +161,6 @@ elif st.session_state.page == "forecast":
         plot_p90_y = y_pred + np.std(y)
         plot_p10_y = y_pred - np.std(y)
     elif model_type == "ARIMA":
-        from statsmodels.tsa.arima.model import ARIMA
         df_sorted = df.sort_values('ds')
         y = df_sorted['y'].astype(float).values
         order = (1, 1, 1)
