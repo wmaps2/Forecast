@@ -9,20 +9,22 @@ df = None
 st.title("📈 Forecast con P50 / P90")
 st.write("Choose how to provide your sales data:")
 file = st.file_uploader("Upload a CSV file with 'ds' (date) and 'y' (sales)", type="csv")
-gdrive_link = st.text_input("Or paste a Google Drive link to a CSV file")
+gsheets_link = st.text_input("Or paste a Google Sheets link to a sheet")
 
-if gdrive_link:
+if gsheets_link:
     import re
-    match = re.search(r"/d/([\w-]+)", gdrive_link)
+    # Accept links like https://docs.google.com/spreadsheets/d/SHEET_ID/edit#gid=0
+    match = re.search(r"/spreadsheets/d/([\w-]+)", gsheets_link)
     if match:
-        file_id = match.group(1)
-        download_url = f"https://drive.google.com/uc?id={file_id}"
+        sheet_id = match.group(1)
+        # Export first sheet as CSV
+        export_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv"
         try:
-            df = pd.read_csv(download_url)
+            df = pd.read_csv(export_url)
         except Exception as e:
-            st.error(f"Failed to load CSV from Google Drive: {e}")
+            st.error(f"Failed to load CSV from Google Sheets: {e}")
     else:
-        st.error("Invalid Google Drive link format. Please use a link like https://drive.google.com/file/d/FILE_ID/view")
+        st.error("Invalid Google Sheets link format. Please use a link like https://docs.google.com/spreadsheets/d/SHEET_ID/edit")
 elif file:
     df = pd.read_csv(file)
 
