@@ -79,15 +79,16 @@ if st.session_state.page == "input":
                 st.session_state.df = df
                 st.session_state.input_method = input_method
                 st.session_state.page = "forecast"
-                st.experimental_rerun()
+                st.rerun()
 
 elif st.session_state.page == "forecast":
     if st.button("Volver"):
         st.session_state.page = "input"
         st.session_state.df = None
         st.session_state.input_method = None
-        st.experimental_rerun()
+        st.rerun()
 
+    # Only render content, do not call st.experimental_rerun() here
     df = st.session_state.df
     st.subheader("📊 Vista previa de los datos de ventas")
     st.write(df.tail())
