@@ -67,7 +67,6 @@ if st.session_state.page == "input":
             gsheets_link = st.text_input("Pega un enlace de Google Sheets a una hoja", key="gsheets_input")
 
         submitted = st.form_submit_button("Enviar")
-        # Determine input method outside the button logic
         input_method = None
         if file:
             input_method = "CSV"
@@ -75,29 +74,18 @@ if st.session_state.page == "input":
             input_method = "Google Sheets"
 
         if submitted and input_method is not None:
-            st.session_state.input_method = input_method
-            st.session_state.file = file
-            st.session_state.gsheets_link = gsheets_link
-            st.session_state.page = "loading"
-            st.experimental_rerun()
-
-elif st.session_state.page == "loading":
-    # Load data only once after rerun
-    input_method = st.session_state.input_method
-    file = st.session_state.get("file", None)
-    gsheets_link = st.session_state.get("gsheets_link", None)
-    df = load_data(input_method, file=file, gsheets_link=gsheets_link)
-    if df is not None:
-        st.session_state.df = df
-        st.session_state.page = "forecast"
-        st.experimental_rerun()
-    else:
-        st.session_state.page = "input"
-        st.experimental_rerun()
+            df = load_data(input_method, file=file, gsheets_link=gsheets_link)
+            if df is not None:
+                st.session_state.df = df
+                st.session_state.input_method = input_method
+                st.session_state.page = "forecast"
+                st.experimental_rerun()
 
 elif st.session_state.page == "forecast":
     if st.button("Volver"):
         st.session_state.page = "input"
+        st.session_state.df = None
+        st.session_state.input_method = None
         st.experimental_rerun()
 
     df = st.session_state.df
