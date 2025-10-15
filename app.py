@@ -70,18 +70,36 @@ if df is not None:
     st.subheader("📊 Sales Data Preview")
     st.write(df.tail())
 
+    # Detect frequency (daily, weekly, monthly)
+    date_diffs = df['ds'].sort_values().diff().dt.days.dropna()
+    freq = 'D'
+    periods = 30
+    if not date_diffs.empty:
+        mode_diff = date_diffs.mode().iloc[0]
+        if mode_diff == 7:
+            freq = 'W'
+            periods = 12  # 12 weeks forecast
+        elif 28 <= mode_diff <= 31:
+            freq = 'M'
+            periods = 6   # 6 months forecast
+
     # Fit Prophet model
     model = Prophet()
     model.fit(df)
 
-    # Create future dataframe
-    future = model.make_future_dataframe(periods=30)
+    # Create future dataframe with detected frequency
+    future = model.make_future_dataframe(periods=periods, freq=freq)
     forecast = model.predict(future)
 
     # Get last actual date and safe offset
     last_date = df['ds'].max()
-    one_day = to_offset("1D")
-    forecast_future = forecast[forecast['ds'] > last_date + one_day]
+    if freq == 'W':
+        one_step = pd.Timedelta(days=7)
+    elif freq == 'M':
+        one_step = pd.DateOffset(months=1)
+    else:
+        one_step = to_offset("1D")
+    forecast_future = forecast[forecast['ds'] > last_date + one_step]
 
     # Create Plotly chart
     fig = go.Figure()
