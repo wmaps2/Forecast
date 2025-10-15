@@ -55,8 +55,16 @@ if df is not None:
         st.error("CSV/Sheet must contain columns named 'ds' (date) and 'y' (sales).")
         st.stop()
 
-    # Safely convert 'ds' to datetime and drop invalid rows
-    df['ds'] = pd.to_datetime(df['ds'], errors='coerce')
+    # Robustly parse dates using dateutil.parser
+    from dateutil.parser import parse
+
+    def robust_parse_date(val):
+        try:
+            return parse(str(val), dayfirst=True)
+        except Exception:
+            return pd.NaT
+
+    df['ds'] = df['ds'].apply(robust_parse_date)
     df = df.dropna(subset=['ds'])
 
     st.subheader("📊 Sales Data Preview")
