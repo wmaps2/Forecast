@@ -55,7 +55,10 @@ if df is not None:
         st.error("CSV/Sheet must contain columns named 'ds' (date) and 'y' (sales).")
         st.stop()
 
-    df['ds'] = pd.to_datetime(df['ds'])
+    # Safely convert 'ds' to datetime and drop invalid rows
+    df['ds'] = pd.to_datetime(df['ds'], errors='coerce')
+    df = df.dropna(subset=['ds'])
+
     st.subheader("📊 Sales Data Preview")
     st.write(df.tail())
 
