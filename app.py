@@ -4,16 +4,31 @@ from prophet import Prophet
 import plotly.graph_objects as go
 from pandas.tseries.frequencies import to_offset
 
-st.title("📈 Forecast con P50 / P90")
+df = None
 
-# Upload CSV file
+st.title("📈 Forecast con P50 / P90")
+st.write("Choose how to provide your sales data:")
 file = st.file_uploader("Upload a CSV file with 'ds' (date) and 'y' (sales)", type="csv")
-if file:
-    # Load and prepare data
+gdrive_link = st.text_input("Or paste a Google Drive link to a CSV file")
+
+if gdrive_link:
+    import re
+    match = re.search(r"/d/([\w-]+)", gdrive_link)
+    if match:
+        file_id = match.group(1)
+        download_url = f"https://drive.google.com/uc?id={file_id}"
+        try:
+            df = pd.read_csv(download_url)
+        except Exception as e:
+            st.error(f"Failed to load CSV from Google Drive: {e}")
+    else:
+        st.error("Invalid Google Drive link format. Please use a link like https://drive.google.com/file/d/FILE_ID/view")
+elif file:
     df = pd.read_csv(file)
+
+if df is not None:
     df.columns = ['ds', 'y']
     df['ds'] = pd.to_datetime(df['ds'])
-
     st.subheader("📊 Sales Data Preview")
     st.write(df.tail())
 
@@ -69,18 +84,14 @@ if file:
         line=dict(color='red', dash='dot')
     ))
 
-    # 5. Vertical line at forecast start
-    # fig.add_shape(
-    #     type="line",
-    #     x0=last_date,
-    #     x1=last_date,
-    #     y0=0,
-    #     y1=1,
-    #     xref='x',
-    #     yref='paper',
-    #     line=dict(color="gray", dash="dot")
-    # )
+    fig.update_layout(
+        title="Actual Sales + Forecast with P10–P90 Uncertainty",
+        xaxis_title="Date",
+        yaxis_title="Sales",
+        legend_title="Legend"
+    )
 
+    st.plotly_chart(fig)
     # 6. Annotation label
     # fig.add_annotation(
     #     x=last_date,
