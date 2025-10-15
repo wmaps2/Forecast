@@ -11,22 +11,41 @@ st.write("Choose how to provide your sales data:")
 file = st.file_uploader("Upload a CSV file with 'ds' (date) and 'y' (sales)", type="csv")
 gsheets_link = st.text_input("Or paste a Google Sheets link to a sheet")
 
+def find_header_row(df):
+    for i in range(min(10, len(df))):
+        row = df.iloc[i].astype(str).str.lower()
+        if 'ds' in row.values and 'y' in row.values:
+            return i
+    return None
+
 if gsheets_link:
     import re
-    # Accept links like https://docs.google.com/spreadsheets/d/SHEET_ID/edit#gid=0
     match = re.search(r"/spreadsheets/d/([\w-]+)", gsheets_link)
     if match:
         sheet_id = match.group(1)
-        # Export first sheet as CSV
         export_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv"
         try:
-            df = pd.read_csv(export_url)
+            temp_df = pd.read_csv(export_url, header=None)
+            header_row = find_header_row(temp_df)
+            if header_row is not None:
+                temp_df.columns = temp_df.iloc[header_row]
+                df = temp_df.drop(range(header_row+1)).reset_index(drop=True)
+            else:
+                st.error("Could not find header row with 'ds' and 'y' columns in the sheet.")
+                st.stop()
         except Exception as e:
             st.error(f"Failed to load CSV from Google Sheets: {e}")
     else:
         st.error("Invalid Google Sheets link format. Please use a link like https://docs.google.com/spreadsheets/d/SHEET_ID/edit")
 elif file:
-    df = pd.read_csv(file)
+    temp_df = pd.read_csv(file, header=None)
+    header_row = find_header_row(temp_df)
+    if header_row is not None:
+        temp_df.columns = temp_df.iloc[header_row]
+        df = temp_df.drop(range(header_row+1)).reset_index(drop=True)
+    else:
+        st.error("Could not find header row with 'ds' and 'y' columns in the file.")
+        st.stop()
 
 if df is not None:
     # Ensure 'ds' and 'y' columns exist anywhere in the file
