@@ -60,24 +60,26 @@ if "input_method" not in st.session_state:
 
 if st.session_state.page == "input":
     tab1, tab2 = st.tabs(["Subir CSV", "Google Sheets"])
-    with tab1:
-        file = st.file_uploader("Sube un archivo CSV con 'ds' (fecha) y 'y' (ventas)", type="csv", key="csv_uploader")
-    with tab2:
-        gsheets_link = st.text_input("Pega un enlace de Google Sheets a una hoja", key="gsheets_input")
+    with st.form("input_form"):
+        with tab1:
+            file = st.file_uploader("Sube un archivo CSV con 'ds' (fecha) y 'y' (ventas)", type="csv", key="csv_uploader")
+        with tab2:
+            gsheets_link = st.text_input("Pega un enlace de Google Sheets a una hoja", key="gsheets_input")
 
-    input_method = None
-    if file:
-        input_method = "CSV"
-    elif gsheets_link:
-        input_method = "Google Sheets"
+        input_method = None
+        if file:
+            input_method = "CSV"
+        elif gsheets_link:
+            input_method = "Google Sheets"
 
-    if st.button("Enviar"):
-        df = load_data(input_method, file=file, gsheets_link=gsheets_link)
-        if df is not None:
-            st.session_state.df = df
-            st.session_state.input_method = input_method
-            st.session_state.page = "forecast"
-            st.experimental_rerun()
+        submitted = st.form_submit_button("Enviar")
+        if submitted:
+            df = load_data(input_method, file=file, gsheets_link=gsheets_link)
+            if df is not None:
+                st.session_state.df = df
+                st.session_state.input_method = input_method
+                st.session_state.page = "forecast"
+                st.experimental_rerun()
 elif st.session_state.page == "forecast":
     if st.button("Volver"):
         st.session_state.page = "input"
