@@ -2,3 +2,4 @@ streamlit
 prophet
 pandas
 plotly
+scikit-learn

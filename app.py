@@ -3,8 +3,11 @@ import pandas as pd
 from prophet import Prophet
 import plotly.graph_objects as go
 from pandas.tseries.frequencies import to_offset
-from sklearn.linear_model import LinearRegression
-import numpy as np
+try:
+    from sklearn.linear_model import LinearRegression
+    import numpy as np
+except ModuleNotFoundError:
+    st.error("Falta el paquete 'scikit-learn'. Instálalo con 'pip install scikit-learn' para usar la regresión lineal.")
 from statsmodels.tsa.arima.model import ARIMA
 
 def find_header_row(df):
