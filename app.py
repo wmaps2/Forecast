@@ -65,19 +65,19 @@ if "input_method" not in st.session_state:
     st.session_state.input_method = None
 
 if st.session_state.page == "input":
-    tab1, tab2 = st.tabs(["Subir CSV", "Google Sheets"])
+    tab1, tab2 = st.tabs(["Google Sheets", "Subir CSV"])
     with st.form("input_form"):
         with tab1:
-            file = st.file_uploader("Sube un archivo CSV con 'ds' (fecha) y 'y' (ventas)", type="csv", key="csv_uploader")
-        with tab2:
             gsheets_link = st.text_input("Pega un enlace de Google Sheets a una hoja", key="gsheets_input")
+        with tab2:
+            file = st.file_uploader("Sube un archivo CSV con 'ds' (fecha) y 'y' (ventas)", type="csv", key="csv_uploader")
 
         submitted = st.form_submit_button("Enviar")
         input_method = None
-        if file:
-            input_method = "CSV"
-        elif gsheets_link:
+        if gsheets_link:
             input_method = "Google Sheets"
+        elif file:
+            input_method = "CSV"
 
         if submitted and input_method is not None:
             df = load_data(input_method, file=file, gsheets_link=gsheets_link)
@@ -153,7 +153,8 @@ elif st.session_state.page == "forecast":
     elif model_type == "Linear Regression":
         df_sorted = df.sort_values('ds')
         X = df_sorted['ds'].map(pd.Timestamp.toordinal).values.reshape(-1, 1)
-        y = df_sorted['y'].values
+        # Ensure y is numeric
+        y = pd.to_numeric(df_sorted['y'], errors='coerce').values
         lr = LinearRegression()
         lr.fit(X, y)
         last_date = df_sorted['ds'].max()
@@ -165,7 +166,6 @@ elif st.session_state.page == "forecast":
             future_dates = pd.date_range(last_date + to_offset("1D"), periods=periods, freq='D')
         X_future = future_dates.map(pd.Timestamp.toordinal).values.reshape(-1, 1)
         y_pred = lr.predict(X_future)
-        # Ensure y_pred is a numpy array for arithmetic
         y_pred = np.array(y_pred)
         plot_actual_x = df_sorted['ds']
         plot_actual_y = df_sorted['y']
@@ -193,8 +193,9 @@ elif st.session_state.page == "forecast":
         plot_actual_y = df_sorted['y']
         plot_forecast_x = future_dates
         plot_forecast_y = y_pred
-        plot_p90_y = conf_int.iloc[:, 1]
-        plot_p10_y = conf_int.iloc[:, 0]
+        # Use numpy indexing for conf_int
+        plot_p90_y = conf_int[:, 1]
+        plot_p10_y = conf_int[:, 0]
 
     # Create Plotly chart
     fig = go.Figure()
