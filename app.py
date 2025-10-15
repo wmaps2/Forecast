@@ -106,6 +106,14 @@ elif st.session_state.page == "forecast":
         key="model_dropdown"
     )
 
+    # Model explanation
+    if model_type == "Prophet":
+        st.info("Prophet ajusta tendencias y patrones estacionales en los datos históricos para predecir valores futuros, manejando automáticamente cambios y ciclos.")
+    elif model_type == "Linear Regression":
+        st.info("La regresión lineal ajusta una línea recta a los datos históricos y proyecta esa tendencia hacia el futuro para estimar los valores siguientes.")
+    elif model_type == "ARIMA":
+        st.info("ARIMA utiliza relaciones pasadas y diferencias entre valores para modelar y predecir la evolución futura de la serie temporal.")
+
     # Detect frequency (daily, weekly, monthly)
     date_diffs = df['ds'].sort_values().diff().dt.days.dropna()
     freq = 'D'
@@ -157,6 +165,8 @@ elif st.session_state.page == "forecast":
             future_dates = pd.date_range(last_date + to_offset("1D"), periods=periods, freq='D')
         X_future = future_dates.map(pd.Timestamp.toordinal).values.reshape(-1, 1)
         y_pred = lr.predict(X_future)
+        # Ensure y_pred is a numpy array for arithmetic
+        y_pred = np.array(y_pred)
         plot_actual_x = df_sorted['ds']
         plot_actual_y = df_sorted['y']
         plot_forecast_x = future_dates
